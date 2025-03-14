@@ -69,38 +69,31 @@ export class BloomFilter {
   constructor(
     bitsPerElement: Uint8Array<ArrayBufferLike> | number = 10,
     estimatedNumberOfElements: Array<HashFn> | number = 50000,
-    hashFns: Array<HashFn>
+    hashFns?: Array<HashFn>
   ) {
-    if (estimatedNumberOfElements.constructor === Array) {
-      hashFns = estimatedNumberOfElements;
-    }
     if (
-      bitsPerElement.constructor === Uint8Array &&
-      estimatedNumberOfElements.constructor === Array
+      typeof bitsPerElement === "number" &&
+      typeof estimatedNumberOfElements === "number"
     ) {
-      hashFns = estimatedNumberOfElements;
+      // Calculate the needed buffer size in bytes
+      this.bufferBitSize = bitsPerElement * estimatedNumberOfElements;
+      this.buffer = new Uint8Array(Math.ceil(this.bufferBitSize / 8));
+    } else if (bitsPerElement.constructor === Uint8Array) {
       // Re-order params
       this.buffer = new Uint8Array(bitsPerElement);
       // Calculate new buffer size
       this.bufferBitSize = this.buffer.length * 8;
-    } else if (
-      typeof bitsPerElement === "number" &&
-      typeof estimatedNumberOfElements === "number"
-    ) {
-      // if (typeof bitsPerElement === 'number' && typeof estimatedNumberOfElements === 'number')
-      // Calculate the needed buffer size in bytes
-      this.bufferBitSize = bitsPerElement * estimatedNumberOfElements;
-      this.buffer = new Uint8Array(Math.ceil(this.bufferBitSize / 8));
     } else {
       throw new Error(
-        "bitsPerElement and estimatedNumberOfElements must both be arrayLike, or numbers"
+        `bitsPerElement being a number and estimatedNumberOfElements being arraylike
+        is invalid`
       );
     }
-    this.hashFns = hashFns || [
-      simpleHashFn(11),
-      simpleHashFn(17),
-      simpleHashFn(23),
-    ];
+    this.hashFns = hashFns
+      ? hashFns
+      : estimatedNumberOfElements.constructor === Array
+      ? estimatedNumberOfElements
+      : [simpleHashFn(11), simpleHashFn(17), simpleHashFn(23)];
     this.setBit = setBit.bind(this, this.buffer);
     this.isBitSet = isBitSet.bind(this, this.buffer);
   }
@@ -109,11 +102,11 @@ export class BloomFilter {
    * Construct a Bloom filter from a previous array of data
    * Note that the hash functions must be the same!
    */
-  static from(arrayLike: Uint8Array<ArrayBufferLike>, hashFns: HashFn[]) {
+  static from(arrayLike: Uint8Array<ArrayBufferLike>, hashFns?: HashFn[]) {
     // TODO: find out what constructor BloomFilter is using here... how
     // are the number of args 2 instead of 3, and have different types
     // than the original first and second constructor params?
-    return new BloomFilter(arrayLike, undefined, hashFns);
+    return new BloomFilter(arrayLike, hashFns);
   }
 
   /**
@@ -122,7 +115,7 @@ export class BloomFilter {
    * Note that BloomFilter.from only works if the hash functions are the same.
    */
   toJSON() {
-    return Array.from(this.buffer.values());
+    return new Uint8Array(this.buffer.values());
   }
 
   /**
@@ -157,11 +150,14 @@ export class BloomFilter {
     lastHashes?: number[],
     lastCharCode?: number
   ) {
-    // Is this a bug?
+    // Originally, this code passed one too many args, so the bufferBitSize
+    // wasn't actually used. I tried modding the result of a hashFn by
+    /// bufferBitSize, similar to other functions, and that resulted in an
+    // error. So it seems that the bufferBitSize can be safely excluded.
     return this.hashFns.map(
       (h, i) =>
-        h(charCodes, lastHashes ? lastHashes[i] : undefined, lastCharCode) %
-        this.bufferBitSize
+        h(charCodes, lastHashes ? lastHashes[i] : undefined, lastCharCode) // %
+      //        this.bufferBitSize
     );
   }
 
@@ -211,12 +207,22 @@ export class BloomFilter {
 
     let lastHashes: number[] | undefined, lastCharCode;
     for (let i = 0; i < data.length - substringLength + 1; i++) {
+      // /this will slide over so it compares the correct strings
+      // Modifying lastHashes, with lastHashes, seems funky
       lastHashes = this.getHashesForCharCodes(
         data.subarray(i, i + substringLength),
         lastHashes,
         lastCharCode
       );
-      if (lastHashes.map((x) => x % this.bufferBitSize).every(this.isBitSet)) {
+
+      // need to find out where the isBitSet check fails and why.
+      // the issue doesn't seem to be with toCharCodeArray.
+      // Begs the question, are the bits being set as expected?
+      if (
+        lastHashes
+          .map((x) => x % this.bufferBitSize)
+          .every((bitLocation) => this.isBitSet(bitLocation))
+      ) {
         return true;
       }
       lastCharCode = data[i];
