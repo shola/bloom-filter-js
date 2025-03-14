@@ -8,6 +8,7 @@
     "build": "babel --modules umd src/*.js --out-dir dist  --source-maps",
     "build-jsm": "babel --modules ignore --plugins babel-jsm-plugin src/*.js --out-dir dist --source-maps",
     "lint": "standard",
+    "lint:fix": "standard --fix",
     "prepublish": "npm run build"
   },
   "jest": {
