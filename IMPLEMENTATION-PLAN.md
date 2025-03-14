@@ -7,30 +7,43 @@ This document outlines the plan for migrating the bloom-filter-js project to Typ
 
 ```mermaid
 flowchart TB
-    A[Phase 1: Setup] --> B[Phase 2: Migration]
-    B --> C[Phase 3: Test Migration]
-    C --> D[Phase 4: Build System]
-    D --> E[Phase 5: Optimization]
+    subgraph Phase1[Phase 1: Setup]
+        A1[Initialize Bun] --> A2[Setup TypeScript]
+        A2 --> A3[Configure tsconfig.json]
+        A3 --> A4[Update package.json]
+        A4 --> A5[Setup Build Pipeline]
+    end
 
-    A --> A1[Initialize TypeScript]
-    A --> A2[Setup tsconfig.json]
-    A --> A3[Update package.json]
+    subgraph Phase2[Phase 2: Core Migration]
+        B1[Convert main.js to TypeScript] --> B2[Add Type Definitions]
+        B2 --> B3[Implement Interfaces]
+        B3 --> B4[Add Generic Support]
+        B4 --> B5[Type Numeric Operations]
+    end
 
-    B --> B1[Convert main.js to TypeScript]
-    B --> B2[Add type definitions]
-    B --> B3[Handle numeric operations]
+    subgraph Phase3[Phase 3: Test Suite]
+        C1[Convert Tests to TypeScript] --> C2[Add Type Coverage Tests]
+        C2 --> C3[Setup Bun Test Runner]
+        C3 --> C4[Add Performance Tests]
+        C4 --> C5[Verify All Tests Pass]
+    end
 
-    C --> C1[Convert tests to TypeScript]
-    C --> C2[Update Jest config]
-    C --> C3[Verify all tests pass]
+    subgraph Phase4[Phase 4: Optimization]
+        D1[Run Benchmarks] --> D2[Optimize Bundle Size]
+        D2 --> D3[Tree Shaking]
+        D3 --> D4[Performance Tuning]
+    end
 
-    D --> D1[Configure Bun]
-    D --> D2[Update build process]
-    D --> D3[Update CI pipeline]
+    subgraph Phase5[Phase 5: Documentation]
+        E1[Update API Docs] --> E2[Add TypeScript Examples]
+        E2 --> E3[Document Bun Integration]
+        E3 --> E4[Add Benchmark Results]
+    end
 
-    E --> E1[Performance testing]
-    E --> E2[Bundle size optimization]
-    E --> E3[Documentation updates]
+    Phase1 --> Phase2
+    Phase2 --> Phase3
+    Phase3 --> Phase4
+    Phase4 --> Phase5
 ```
 
 ## Detailed Implementation Plan
