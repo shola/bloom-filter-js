@@ -7,7 +7,7 @@
   "scripts": {
     "test": "bun test",
     "test:jasmine": "jest --verbose",
-    "build": "bun build ./src/main.ts --outdir ./dist",
+    "build": "bun build ./src/main.ts --outdir ./dist/srcBun --sourcemap=inline",
     "build:babel": "babel --modules umd src/*.js --out-dir dist  --source-maps",
     "build-jsm": "babel --modules ignore --plugins babel-jsm-plugin src/*.js --out-dir dist --source-maps",
     "typecheck": "tsc --noEmit",
