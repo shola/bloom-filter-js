@@ -156,3 +156,20 @@ describe("setBit and isBitSet", function () {
   });
 });
 
+describe("Type Definitions", () => {
+  test("BloomFilter constructor type constraints", () => {
+    expect(() => new BloomFilter("10", 50000)).toThrow();
+    expect(() => new BloomFilter(10, "50000")).toThrow();
+    expect(() => new BloomFilter(-10, 50000)).toThrow();
+    expect(() => new BloomFilter(10, -50000)).toThrow();
+    expect(() => new BloomFilter(10, new Uint8Array([10, 20]))).toThrow();
+    expect(() => new BloomFilter(10, 50000)).not.toThrow();
+  });
+});
+
+describe("Type Boundary Cases", () => {
+  test("buffer size limits", () => {
+    const maxSize = Number.MAX_SAFE_INTEGER;
+    expect(() => new BloomFilter(maxSize, maxSize)).toThrow();
+  });
+});

@@ -75,6 +75,12 @@ export class BloomFilter {
       typeof bitsPerElement === "number" &&
       typeof estimatedNumberOfElements === "number"
     ) {
+      // Add parameter validation
+      if (bitsPerElement <= 0 || estimatedNumberOfElements <= 0) {
+        throw new Error(
+          "Bits per element and estimated number of elements must be positive"
+        );
+      }
       // Calculate the needed buffer size in bytes
       this.bufferBitSize = bitsPerElement * estimatedNumberOfElements;
       this.buffer = new Uint8Array(Math.ceil(this.bufferBitSize / 8));
@@ -89,11 +95,12 @@ export class BloomFilter {
         is invalid`
       );
     }
-    this.hashFns = hashFns
-      ? hashFns
-      : estimatedNumberOfElements.constructor === Array
-      ? estimatedNumberOfElements
-      : [simpleHashFn(11), simpleHashFn(17), simpleHashFn(23)];
+    this.hashFns =
+      hashFns && hashFns.length
+        ? hashFns
+        : estimatedNumberOfElements.constructor === Array
+        ? estimatedNumberOfElements
+        : [simpleHashFn(11), simpleHashFn(17), simpleHashFn(23)];
     this.setBit = setBit.bind(this, this.buffer);
     this.isBitSet = isBitSet.bind(this, this.buffer);
   }
@@ -220,7 +227,14 @@ export class BloomFilter {
       // Begs the question, are the bits being set as expected?
       if (
         lastHashes
-          .map((x) => x % this.bufferBitSize)
+          .map((x) => {
+            const bitLocation = x % this.bufferBitSize;
+            // Add buffer overflow protection
+            if (bitLocation >= this.bufferBitSize) {
+              throw new Error("Bit location exceeds buffer size");
+            }
+            return bitLocation;
+          })
           .every((bitLocation) => this.isBitSet(bitLocation))
       ) {
         return true;
