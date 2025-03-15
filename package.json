@@ -30,14 +30,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bbondy/bloom-filter-js.git"
+    "url": "git+https://github.com/shola/bloom-filter-js.git"
   },
-  "author": "Brian R. Bondy <netzen@gmail.com> (http://www.brianbondy.com)",
+  "author": "Michael Olusola Situ <michael.o.situ@gmail.com> (https://www.linkedin.com/in/olu-situ.com)",
   "license": "MPL-2.0",
   "bugs": {
-    "url": "https://github.com/bbondy/bloom-filter-js/issues"
+    "url": "https://github.com/shola/bloom-filter-js/issues"
   },
-  "homepage": "https://github.com/bbondy/bloom-filter-js#readme",
+  "homepage": "https://github.com/shola/bloom-filter-js#readme",
   "dependencies": {
     "bun": "^1.2.5"
   },
